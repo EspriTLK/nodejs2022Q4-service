@@ -6,24 +6,33 @@ import { db } from '../DB/DB'
 export class UserService {
 	private db = db
 	getAll() {
-		return this.db.getAll()
+		return this.db.getAllUsers()
 	}
 
-	getById(id: string) {
-		return this.db.getById(id)
+	async getById(id: string) {
+		const currentUser = await this.db.getUserById(id)
+		if (!currentUser) {
+			throw new Error()
+		}
+		return currentUser
 	}
 
 	async create(dto: CreateUserDto) {
-		if (!dto.login || !dto.password) {
-			return new Error('not required fields')
-		} else {
-			const user = await this.db.addData(dto)
-			return user
-		}
-
+		const user = await this.db.createUser(dto)
+		return user
 	}
 
-	update(dtp: UpdatePasswordDto) {
+	async update(id: string, dto: UpdatePasswordDto) {
+		const changedUser = await this.db.updateUserPassword(id, dto)
+		if (!changedUser) {
+			console.log('[from service]')
+			throw new Error('service')
+		}
+		return changedUser
+	}
 
+	async delete(id: string) {
+		const userDelete = await this.db.removeUser(id)
+		return userDelete
 	}
 }

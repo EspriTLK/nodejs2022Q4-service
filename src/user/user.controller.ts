@@ -1,8 +1,10 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Put, Req, Res } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpException, HttpStatus, Param, Post, Put, Req, Res } from '@nestjs/common';
 import DB from 'src/DB/DB';
 import { CreateUserDto, UpdatePasswordDto } from './dto/user.dto';
+import { userErrors } from './user.constants';
 import { UserModel } from './user.model';
 import { UserService } from './user.service';
+import { validate } from 'uuid'
 
 @Controller('user')
 export class UserController {
@@ -18,21 +20,24 @@ export class UserController {
 
 	@Get(':id')
 	async getUser(@Param('id') id: string) {
-		return await this.userService.getById(id)
+		if (!validate(id)) {
+			throw new HttpException(userErrors.USER_ID_IS_NOT_VALID, HttpStatus.BAD_REQUEST)
+		}
+		try {
+			return await this.userService.getById(id)
+		} catch (err) {
+			throw new HttpException(userErrors.USER_IS_NOT_EXISTS, HttpStatus.NOT_FOUND)
+		}
 	}
 
 	@Post()
 	@HttpCode(HttpStatus.CREATED)
-	@HttpCode(HttpStatus.BAD_REQUEST)
-	async addUser(@Body() dto: CreateUserDto, @Res() res) {
-		// return await this.userService.create(dto)
+	async addUser(@Body() dto: CreateUserDto) {
 		if (!dto.login || !dto.password) {
-			res.status(400).send({ status: res.statusCode, message: 'required fields are incorrect' })
-			return { status: res.statusCode, message: 'ololo' }
+			throw new HttpException(userErrors.REQIRE_FIELDS_NO_EXISTS, HttpStatus.BAD_REQUEST)
 		}
 		try {
-			res.send(await this.userService.create(dto))
-			// return await this.userService.create(dto)
+			return await this.userService.create(dto)
 		} catch (error) {
 			return error.message
 		}
@@ -42,6 +47,24 @@ export class UserController {
 	@HttpCode(200)
 	@Put(':id')
 	async changePassword(@Param('id') id: string, @Body() dto: UpdatePasswordDto) {
+		await this.getUser(id).then(async (user) => {
+			if (user.password !== dto.oldPassword) {
+				throw new HttpException(userErrors.OLD_PASSWORD_IS_WRONG, HttpStatus.FORBIDDEN)
+			}
+			if (!dto.oldPassword || !dto.newPassword) {
+				throw new HttpException(userErrors.REQIRE_FIELDS_NO_EXISTS, HttpStatus.BAD_REQUEST)
+			}
+			await this.userService.update(id, dto)
+		})
+		return `user password update successfully`
+	}
 
+	@HttpCode(204)
+	@Delete(':id')
+	async delete(@Param('id') id: string) {
+		await this.getUser(id).then(async (user) => {
+			await this.userService.delete(user.id)
+		})
+		return 'user deleted'
 	}
 }

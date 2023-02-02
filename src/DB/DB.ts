@@ -1,31 +1,48 @@
 import { Injectable } from "@nestjs/common";
+import { findIndex } from "rxjs";
 import DBUsers from "./entities/DBUsers";
 
 @Injectable()
 export default class DB {
-	DB = []
+	DB = { users: [], albums: [], artists: [], tracks: [], favorites: [] }
 	users = new DBUsers()
 
 	constructor() {
-		this.addData = this.addData.bind(this)
+		// this.createUser = this.createUser.bind(this)
 	}
 
-	async addData(data) {
+	async createUser(data) {
 		const user = await this.users.create(data)
 		if (user) {
-			this.DB.push(user)
+			this.DB.users.push(user)
 			return user
-		} else {
-			return new Error('AAAA')
 		}
 	}
 
-	async getAll() {
-		return await this.DB
+	async getAllUsers() {
+		return await this.DB.users
 	}
 
-	async getById(id) {
-		return await this.DB.find(u => u.id === id)
+	async getUserById(id) {
+		return await this.DB.users.find(u => u.id === id)
+	}
+
+	async updateUserPassword(id, data) {
+		const changedUser = await this.getUserById(id)
+		if (changedUser && changedUser.password === data.oldPassword) {
+			const newUser = await this.users.update(data, changedUser)
+			changedUser.password = data.newPassword
+			changedUser.version = newUser.version
+			changedUser.updatedAt = newUser.updatedAt
+			// this.users.update(data, changedUser)
+			return 'update succesfully'
+		}
+	}
+
+	async removeUser(id) {
+		await this.getUserById(id)
+		// console.log(await this.DB.users.findIndex(u => u.id === id))
+		this.DB.users.splice(await this.DB.users.findIndex(user => user.id === id, 1))
 	}
 }
 
