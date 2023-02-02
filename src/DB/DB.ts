@@ -1,5 +1,7 @@
+import { Injectable } from "@nestjs/common";
 import DBUsers from "./entities/DBUsers";
 
+@Injectable()
 export default class DB {
 	DB = []
 	users = new DBUsers()
@@ -10,11 +12,21 @@ export default class DB {
 
 	async addData(data) {
 		const user = await this.users.create(data)
-		console.log(user)
-		return this.DB.push(user)
+		if (user) {
+			this.DB.push(user)
+			return user
+		} else {
+			return new Error('AAAA')
+		}
 	}
 
-	getAll() {
-		return this.DB
+	async getAll() {
+		return await this.DB
+	}
+
+	async getById(id) {
+		return await this.DB.find(u => u.id === id)
 	}
 }
+
+export const db = new DB()

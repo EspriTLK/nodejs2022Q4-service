@@ -1,33 +1,42 @@
-import { Body, Controller, Get, HttpCode, Param, Post, Put, Req, Res } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post, Put, Req, Res } from '@nestjs/common';
 import DB from 'src/DB/DB';
 import { CreateUserDto, UpdatePasswordDto } from './dto/user.dto';
 import { UserModel } from './user.model';
-
-const db = new DB();
+import { UserService } from './user.service';
 
 @Controller('user')
 export class UserController {
 
+	constructor(private readonly userService: UserService) {
+
+	}
+
 	@Get()
 	async getUsers() {
-		return db.getAll()
+		return await this.userService.getAll()
 	}
 
 	@Get(':id')
 	async getUser(@Param('id') id: string) {
-
+		return await this.userService.getById(id)
 	}
 
 	@Post()
+	@HttpCode(HttpStatus.CREATED)
+	@HttpCode(HttpStatus.BAD_REQUEST)
 	async addUser(@Body() dto: CreateUserDto, @Res() res) {
+		// return await this.userService.create(dto)
 		if (!dto.login || !dto.password) {
-			res.status(400).send(`required fields doesn't exist`);
-			// return ('ERRORRRR!!!!!!!!');
-		} else {
-			res.status(200).send(`ass user ${dto}`);
-			return db.addData(dto)
+			res.status(400).send({ status: res.statusCode, message: 'required fields are incorrect' })
+			return { status: res.statusCode, message: 'ololo' }
 		}
-		console.log(dto)
+		try {
+			res.send(await this.userService.create(dto))
+			// return await this.userService.create(dto)
+		} catch (error) {
+			return error.message
+		}
+
 	}
 
 	@HttpCode(200)
