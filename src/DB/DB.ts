@@ -7,11 +7,12 @@ import DBAlbums from "./entities/DBAlbums";
 
 @Injectable()
 export default class DB {
-	DB = { users: [], albums: [], artists: [], tracks: [], favorites: [] }
+	DB = { users: [], albums: [], artists: [], tracks: [], favorites: [{ artists: [], albums: [], tracks: [] }] }
 	users = new DBUsers()
 	tracks = new DBTracks()
 	artists = new DBArtists()
 	albums = new DBAlbums()
+	// favorites = [{ artists: [], albums: [], tracks: [] }]
 
 	constructor() {
 	}
@@ -80,6 +81,10 @@ export default class DB {
 	async removeTrack(id) {
 		await this.getTrackById(id)
 		this.DB.tracks.splice(await this.DB.tracks.findIndex(track => track.id === id), 1)
+		if (this.DB.favorites[0].tracks.find(track => track.id === id)) {
+			this.DB.favorites[0].tracks.splice(this.DB.favorites[0].tracks.findIndex(track => track.id === id), 1)
+		}
+
 	}
 
 	async getAllArtists() {
@@ -114,12 +119,14 @@ export default class DB {
 	async removeArtist(id) {
 		await this.getArtistById(id)
 		this.DB.artists.splice(await this.DB.artists.findIndex(artist => artist.id === id), 1)
+
 		if (this.DB.tracks.find(track => track.artistId === id)) {
 			this.DB.tracks.find(track => track.artistId = null)
 		}
 		if (this.DB.albums.find(album => album.artistId === id)) {
 			this.DB.albums.find(album => album.artistId = null)
 		}
+
 	}
 
 	async getAllAlbums() {
@@ -158,6 +165,22 @@ export default class DB {
 		if (this.DB.tracks.find(track => track.albumId === id)) {
 			this.DB.tracks.find(track => track.albumId = null)
 		}
+	}
+
+	async getAllFavs() {
+		return await this.DB.favorites
+	}
+
+	async addToFav(path: string, id) {
+		const service = path[0].toUpperCase() + path.slice(1)
+		await this.DB.favorites[0][path + 's'].push(await this[`get${service}ById`](id))
+		return await this[`get${service}ById`](id)
+	}
+
+	async removeFromFav(path: string, id) {
+		const service = path[0].toUpperCase() + path.slice(1)
+		console.log(await this.DB.favorites.findIndex(fav => fav[`${path}s`].id === id))
+		await this.DB.favorites[0][path + 's'].splice(await this.DB.favorites.findIndex(fav => fav[`${path}s`].id === id), 1)
 	}
 }
 
