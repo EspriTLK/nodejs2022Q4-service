@@ -21,9 +21,8 @@ export class FavoriteService {
 
 	async removeFavorite(path, id) {
 		const service = path[0].toUpperCase() + path.slice(1)
-		const findInFav = await this.db.DB.favorites[0][`${path}s`].find(obj => obj.id === id)
-		console.log(`try to ${await findInFav}`)
-		if (await this.db.DB.favorites[0][`${path}s`].find(obj => obj.id === id)) {
+		const findInFav = await this.db.DB.favorites[`${path}s`].find(obj => obj.id === id)
+		if (await this.db.DB.favorites[`${path}s`].find(obj => obj.id === id)) {
 			return await this.db.removeFromFav(path, id)
 		} else {
 			throw new Error(`id: ${id} not found in DB ${service}`)
