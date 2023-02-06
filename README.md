@@ -8,13 +8,20 @@
 ## Downloading
 
 ```
-git clone {repository URL}
+git clone https://github.com/EspriTLK/nodejs2022Q4-service.git
 ```
 
 ## Installing NPM modules
 
 ```
 npm install
+```
+
+
+## configure .env
+
+```
+rename .env.example to .env & if you need change PORT to number value
 ```
 
 ## Running application
