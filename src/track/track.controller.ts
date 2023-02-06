@@ -1,9 +1,10 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpException, HttpStatus, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpException, HttpStatus, Param, Post, Put } from '@nestjs/common';
 import { TrackService } from './track.service';
 import { validate } from 'uuid';
 import { trackErrors } from './track.constants';
 import { TrackModel } from './track.model';
 import { AddTrackDto } from './dto/create-track.dto';
+import { UpdateTrackDto } from './dto/update-track-dto'
 import { Track } from './interfaces/track.interface';
 
 @Controller('track')
@@ -30,7 +31,6 @@ export class TrackController {
 	@Post()
 	@HttpCode(HttpStatus.CREATED)
 	async addTrack(@Body() dto: AddTrackDto) {
-		console.log("[addTrack]", { dto, typeodduration: typeof dto.duration, duration: dto.duration });
 
 		if (!dto.name || !dto.duration) {
 			throw new HttpException(trackErrors.REQIRE_FIELDS_NO_EXISTS, HttpStatus.BAD_REQUEST)
@@ -42,6 +42,15 @@ export class TrackController {
 			return error.message
 		}
 
+	}
+
+	@HttpCode(200)
+	@Put(':id')
+	async updateTrack(@Param('id') id: string, @Body() dto: UpdateTrackDto) {
+		await this.getTrack(id).then(async (track) => {
+			await this.trackService.update(track.id, dto)
+		})
+		return this.trackService.getById(id)
 	}
 
 	@HttpCode(204)

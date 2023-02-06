@@ -21,7 +21,6 @@ export class UserController {
 
 	@Get(':id')
 	async getUser(@Param('id') id: string): Promise<UserEntity> {
-		console.log("[getUser]", { id, validation: !validate(id) });
 
 		if (!validate(id)) {
 			throw new HttpException(userErrors.USER_ID_IS_NOT_VALID, HttpStatus.BAD_REQUEST)

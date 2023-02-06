@@ -23,14 +23,15 @@ export class TrackService {
 		return track
 	}
 
-	// async update(id: string, dto: UpdatePasswordDto) {
-	// 	const changedUser = await this.db.updateUserPassword(id, dto)
-	// 	if (!changedUser) {
-	// 		console.log('[from service]')
-	// 		throw new Error('service')
-	// 	}
-	// 	return changedUser
-	// }
+	async update(id: string, dto: TrackModel) {
+		const changedTrack = await this.db.updateTrack(id, dto)
+		if (!changedTrack) {
+			console.log('[from service]')
+			throw new Error('service')
+		}
+
+		return changedTrack
+	}
 
 	async delete(id: string) {
 		const trackDelete = await this.db.removeTrack(id)

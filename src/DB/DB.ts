@@ -10,7 +10,6 @@ export default class DB {
 	tracks = new DBTracks()
 
 	constructor() {
-		// this.createUser = this.createUser.bind(this)
 	}
 
 	async createUser(data) {
@@ -36,14 +35,12 @@ export default class DB {
 			changedUser.password = data.newPassword
 			changedUser.version = newUser.version
 			changedUser.updatedAt = newUser.updatedAt
-			// this.users.update(data, changedUser)
 			return 'update succesfully'
 		}
 	}
 
 	async removeUser(id) {
 		await this.getUserById(id)
-		// console.log(await this.DB.users.findIndex(u => u.id === id))
 		this.DB.users.splice(await this.DB.users.findIndex(user => user.id === id), 1)
 	}
 
@@ -63,9 +60,21 @@ export default class DB {
 		}
 	}
 
+	async updateTrack(id, data) {
+		const changedTrack = await this.getTrackById(id)
+		if (changedTrack) {
+			const updatedTrack = await this.tracks.update(data, changedTrack)
+			changedTrack.name = updatedTrack.name
+			changedTrack.artistId = updatedTrack.artistId
+			changedTrack.albumId = updatedTrack.albumId
+			changedTrack.duration = updatedTrack.duration
+
+			return updatedTrack
+		}
+	}
+
 	async removeTrack(id) {
 		await this.getTrackById(id)
-		// console.log(await this.DB.users.findIndex(u => u.id === id))
 		this.DB.tracks.splice(await this.DB.tracks.findIndex(track => track.id === id), 1)
 	}
 }
