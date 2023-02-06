@@ -1,4 +1,4 @@
-import { HttpCode, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CreateUserDto, UpdatePasswordDto } from './dto/user.dto';
 import { db } from '../DB/DB'
 

@@ -1,12 +1,12 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpException, HttpStatus, Param, Post, Put, Req, Res } from '@nestjs/common';
-import DB from 'src/DB/DB';
+import { Body, ClassSerializerInterceptor, Controller, Delete, Get, HttpCode, HttpException, HttpStatus, Param, Post, Put, SerializeOptions, UseInterceptors } from '@nestjs/common';
 import { CreateUserDto, UpdatePasswordDto } from './dto/user.dto';
 import { userErrors } from './user.constants';
-import { UserModel } from './user.model';
+import { UserEntity } from './user.entity';
 import { UserService } from './user.service';
 import { validate } from 'uuid'
 
 @Controller('user')
+@UseInterceptors(ClassSerializerInterceptor)
 export class UserController {
 
 	constructor(private readonly userService: UserService) {
@@ -14,17 +14,21 @@ export class UserController {
 	}
 
 	@Get()
-	async getUsers() {
+	@SerializeOptions({ excludePrefixes: ['password'] })
+	async getUsers(): Promise<UserEntity[]> {
 		return await this.userService.getAll()
 	}
 
 	@Get(':id')
-	async getUser(@Param('id') id: string) {
+	async getUser(@Param('id') id: string): Promise<UserEntity> {
+		console.log("[getUser]", { id, validation: !validate(id) });
+
 		if (!validate(id)) {
 			throw new HttpException(userErrors.USER_ID_IS_NOT_VALID, HttpStatus.BAD_REQUEST)
 		}
+
 		try {
-			return await this.userService.getById(id)
+			return new UserEntity(await this.userService.getById(id))
 		} catch (err) {
 			throw new HttpException(userErrors.USER_IS_NOT_EXISTS, HttpStatus.NOT_FOUND)
 		}
@@ -37,7 +41,7 @@ export class UserController {
 			throw new HttpException(userErrors.REQIRE_FIELDS_NO_EXISTS, HttpStatus.BAD_REQUEST)
 		}
 		try {
-			return await this.userService.create(dto)
+			return new UserEntity(await this.userService.create(dto))
 		} catch (error) {
 			return error.message
 		}
@@ -47,16 +51,19 @@ export class UserController {
 	@HttpCode(200)
 	@Put(':id')
 	async changePassword(@Param('id') id: string, @Body() dto: UpdatePasswordDto) {
+		if (!dto.oldPassword || !dto.newPassword) {
+			throw new HttpException(userErrors.REQIRE_FIELDS_NO_EXISTS, HttpStatus.BAD_REQUEST)
+		}
 		await this.getUser(id).then(async (user) => {
 			if (user.password !== dto.oldPassword) {
 				throw new HttpException(userErrors.OLD_PASSWORD_IS_WRONG, HttpStatus.FORBIDDEN)
 			}
-			if (!dto.oldPassword || !dto.newPassword) {
-				throw new HttpException(userErrors.REQIRE_FIELDS_NO_EXISTS, HttpStatus.BAD_REQUEST)
-			}
+
+
 			await this.userService.update(id, dto)
 		})
-		return `user password update successfully`
+
+		return new UserEntity(await this.getUser(id))
 	}
 
 	@HttpCode(204)

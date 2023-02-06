@@ -10,7 +10,7 @@ export default class DBUsers extends UserModel {
 		const created: IUser = {
 			...dto,
 			id: v4(),
-			version: 0,
+			version: 1,
 			createdAt: Date.now(),
 			updatedAt: Date.now()
 		};
