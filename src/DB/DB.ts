@@ -2,12 +2,14 @@ import { Injectable } from "@nestjs/common";
 import { findIndex } from "rxjs";
 import DBUsers from "./entities/DBUsers";
 import DBTracks from './entities/DBTracks'
+import DBArtists from "./entities/DBArtists";
 
 @Injectable()
 export default class DB {
 	DB = { users: [], albums: [], artists: [], tracks: [], favorites: [] }
 	users = new DBUsers()
 	tracks = new DBTracks()
+	artists = new DBArtists()
 
 	constructor() {
 	}
@@ -76,6 +78,43 @@ export default class DB {
 	async removeTrack(id) {
 		await this.getTrackById(id)
 		this.DB.tracks.splice(await this.DB.tracks.findIndex(track => track.id === id), 1)
+	}
+
+	async getAllArtists() {
+		return await this.DB.artists
+	}
+
+	async getArtistById(id) {
+		return await this.DB.artists.find(artist => artist.id === id)
+	}
+
+	async createArtist(data) {
+		const artist = await this.artists.create(data)
+		if (artist) {
+			this.DB.artists.push(artist)
+			return artist
+		}
+	}
+
+	async updateArtist(id, data) {
+		const changedArtist = await this.getArtistById(id)
+		if (changedArtist) {
+			const updatedArtist = await this.artists.update(data, changedArtist)
+			changedArtist.name = updatedArtist.name
+			changedArtist.grammy = updatedArtist.grammy
+			// changedTrack.albumId = updatedTrack.albumId
+			// changedTrack.duration = updatedTrack.duration
+
+		}
+		return changedArtist
+	}
+
+	async removeArtist(id) {
+		await this.getArtistById(id)
+		this.DB.artists.splice(await this.DB.artists.findIndex(artist => artist.id === id), 1)
+		if (this.DB.tracks.find(track => track.artistId === id)) {
+			this.DB.tracks.find(track => track.artistId = null)
+		}
 	}
 }
 
