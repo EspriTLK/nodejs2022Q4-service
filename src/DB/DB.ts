@@ -3,6 +3,7 @@ import { findIndex } from "rxjs";
 import DBUsers from "./entities/DBUsers";
 import DBTracks from './entities/DBTracks'
 import DBArtists from "./entities/DBArtists";
+import DBAlbums from "./entities/DBAlbums";
 
 @Injectable()
 export default class DB {
@@ -10,6 +11,7 @@ export default class DB {
 	users = new DBUsers()
 	tracks = new DBTracks()
 	artists = new DBArtists()
+	albums = new DBAlbums()
 
 	constructor() {
 	}
@@ -114,6 +116,47 @@ export default class DB {
 		this.DB.artists.splice(await this.DB.artists.findIndex(artist => artist.id === id), 1)
 		if (this.DB.tracks.find(track => track.artistId === id)) {
 			this.DB.tracks.find(track => track.artistId = null)
+		}
+		if (this.DB.albums.find(album => album.artistId === id)) {
+			this.DB.albums.find(album => album.artistId = null)
+		}
+	}
+
+	async getAllAlbums() {
+		return await this.DB.albums
+	}
+
+	async getAlbumById(id) {
+		return await this.DB.albums.find(album => album.id === id)
+	}
+
+	async createAlbum(data) {
+		const album = await this.albums.create(data)
+		if (this.albums) {
+			this.DB.albums.push(album)
+			return album
+		}
+	}
+
+	async updateAlbum(id, data) {
+		const changedAlbum = await this.getAlbumById(id)
+		if (changedAlbum) {
+			const updatedAlbum = await this.albums.update(data, changedAlbum)
+			changedAlbum.name = updatedAlbum.name
+			changedAlbum.year = updatedAlbum.year
+			changedAlbum.artistId = updatedAlbum.artistId
+			// changedTrack.albumId = updatedTrack.albumId
+			// changedTrack.duration = updatedTrack.duration
+
+		}
+		return changedAlbum
+	}
+
+	async removeAlbum(id) {
+		await this.getAlbumById(id)
+		this.DB.albums.splice(await this.DB.albums.findIndex(album => album.id === id), 1)
+		if (this.DB.tracks.find(track => track.albumId === id)) {
+			this.DB.tracks.find(track => track.albumId = null)
 		}
 	}
 }
