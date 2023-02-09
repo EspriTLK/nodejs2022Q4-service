@@ -1,9 +1,7 @@
-import { Body, ClassSerializerInterceptor, Controller, Delete, Get, HttpCode, HttpException, HttpStatus, Param, Post, Put, SerializeOptions, UseInterceptors } from '@nestjs/common';
+import { Body, ClassSerializerInterceptor, Controller, Delete, Get, HttpCode, HttpException, HttpStatus, Param, ParseUUIDPipe, Post, Put, SerializeOptions, UseInterceptors } from '@nestjs/common';
 import { CreateUserDto, UpdatePasswordDto } from './dto/user.dto';
-import { userErrors } from './user.constants';
-import { UserEntity } from './user.entity';
+import { UserEntity } from './entities/user.entity'
 import { UserService } from './user.service';
-import { validate } from 'uuid'
 
 @Controller('user')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -16,32 +14,27 @@ export class UserController {
 	@Get()
 	@SerializeOptions({ excludePrefixes: ['password'] })
 	async getUsers(): Promise<UserEntity[]> {
-		return await this.userService.getAll()
+		return await this.userService.finAll()
 	}
 
 	@Get(':id')
-	async getUser(@Param('id') id: string): Promise<UserEntity> {
-
-		if (!validate(id)) {
-			throw new HttpException(userErrors.USER_ID_IS_NOT_VALID, HttpStatus.BAD_REQUEST)
-		}
+	async getUser(@Param('id', ParseUUIDPipe) id: string): Promise<UserEntity> {
 
 		try {
-			return new UserEntity(await this.userService.getById(id))
+			return new UserEntity(await this.userService.findOne(id))
 		} catch (err) {
-			throw new HttpException(userErrors.USER_IS_NOT_EXISTS, HttpStatus.NOT_FOUND)
+			throw new HttpException(err.message, HttpStatus.NOT_FOUND)
 		}
 	}
 
 	@Post()
 	@HttpCode(HttpStatus.CREATED)
-	async addUser(@Body() dto: CreateUserDto) {
-		if (!dto.login || !dto.password) {
-			throw new HttpException(userErrors.REQIRE_FIELDS_NO_EXISTS, HttpStatus.BAD_REQUEST)
-		}
+	async addUser(@Body() dto: CreateUserDto): Promise<UserEntity> {
 		try {
 			return new UserEntity(await this.userService.create(dto))
 		} catch (error) {
+			console.log(error.message);
+
 			return error.message
 		}
 
@@ -49,28 +42,13 @@ export class UserController {
 
 	@HttpCode(200)
 	@Put(':id')
-	async changePassword(@Param('id') id: string, @Body() dto: UpdatePasswordDto) {
-		if (!dto.oldPassword || !dto.newPassword) {
-			throw new HttpException(userErrors.REQIRE_FIELDS_NO_EXISTS, HttpStatus.BAD_REQUEST)
-		}
-		await this.getUser(id).then(async (user) => {
-			if (user.password !== dto.oldPassword) {
-				throw new HttpException(userErrors.OLD_PASSWORD_IS_WRONG, HttpStatus.FORBIDDEN)
-			}
-
-
-			await this.userService.update(id, dto)
-		})
-
-		return new UserEntity(await this.getUser(id))
+	async changePassword(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdatePasswordDto) {
+		return new UserEntity(await this.userService.update(id, dto))
 	}
 
 	@HttpCode(204)
 	@Delete(':id')
-	async delete(@Param('id') id: string) {
-		await this.getUser(id).then(async (user) => {
-			await this.userService.delete(user.id)
-		})
-		return 'user deleted'
+	async delete(@Param('id', ParseUUIDPipe) id: string) {
+		await this.userService.delete(id)
 	}
 }
