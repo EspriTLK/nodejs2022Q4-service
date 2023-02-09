@@ -1,8 +1,6 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpException, HttpStatus, Param, ParseUUIDPipe, Post, Put } from '@nestjs/common';
-import { validate } from 'uuid';
 import { ArtistService } from './artist.service';
 import { Artist } from './interfaces/artist.interface';
-import { artistsErrors } from './artist.constants';
 import { AddArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
 
@@ -12,24 +10,16 @@ export class ArtistController {
 
 	@Get()
 	async getArtists(): Promise<Artist[]> {
-		return await this.artistService.getAll()
+		return await this.artistService.findAll()
 	}
 
 	@Get(':id')
 	async getArtist(@Param('id', ParseUUIDPipe) id: string): Promise<Artist> {
-		// if (!validate(id)) {
-		// 	throw new HttpException(artistsErrors.TRACK_ID_IS_NOT_VALID, HttpStatus.BAD_REQUEST)
-		// }
-		try {
-			return await this.artistService.getById(id)
-		} catch (err) {
-			throw new HttpException(artistsErrors.TRACK_IS_NOT_EXISTS, HttpStatus.NOT_FOUND)
-		}
+		return await this.artistService.findOne(id)
 	}
 
 	@Post()
 	async createArtist(@Body() dto: AddArtistDto): Promise<Artist | HttpException> {
-		// if(dto typeof )
 		try {
 			return await this.artistService.create(dto)
 		} catch (error) {
@@ -39,22 +29,13 @@ export class ArtistController {
 
 	@HttpCode(200)
 	@Put(':id')
-	async updateTrack(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateArtistDto) {
-		try {
-			return await this.artistService.update(id, dto)
-		} catch {
-			throw new HttpException(artistsErrors.TRACK_IS_NOT_EXISTS, HttpStatus.NOT_FOUND)
-		}
+	async updateTrack(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateArtistDto): Promise<Artist> {
+		return await this.artistService.update(id, dto)
 	}
 
 	@HttpCode(204)
 	@Delete(':id')
 	async delete(@Param('id', ParseUUIDPipe) id: string) {
-		try {
-			await this.getArtist(id)
-			await this.artistService.delete(id)
-		} catch {
-			throw new HttpException(artistsErrors.TRACK_IS_NOT_EXISTS, HttpStatus.NOT_FOUND)
-		}
+		return await this.artistService.delete(id)
 	}
 }

@@ -1,40 +1,49 @@
-import { Injectable } from '@nestjs/common';
-import { db } from 'src/DB/DB'
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { AddArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
+import { ArtistEntity } from './entities/artist.entity';
 
 @Injectable()
 export class ArtistService {
-	private db = db
+	constructor(
+		@InjectRepository(ArtistEntity)
+		private artistRepository: Repository<ArtistEntity>
+	) { }
 
-	async getAll() {
-		return await this.db.getAllArtists()
+	async findAll() {
+		return await this.artistRepository.find()
 	}
 
-	async getById(id: string) {
-		const currentArtist = await this.db.getArtistById(id)
-		if (!currentArtist) {
-			throw new Error('track not found')
+	async findOne(id: string) {
+		const artist = await this.artistRepository.findOne({ where: { id: id } })
+
+		if (artist) {
+			return artist
 		}
-		return currentArtist
+
+		throw new NotFoundException(`Artist with id ${id} not found`)
 	}
 
 	async create(dto: AddArtistDto) {
-		const artist = await this.db.createArtist(dto)
-		return artist
+		const artist = await this.artistRepository.create(dto)
+		return await this.artistRepository.save(artist)
 	}
 
 	async update(id: string, dto: UpdateArtistDto) {
-		const changedArtist = await this.db.updateArtist(id, dto)
-		if (!changedArtist) {
-			throw new Error('service')
-		}
+		const artistToUpdate = await this.findOne(id)
 
-		return changedArtist
+		if (artistToUpdate) {
+			Object.assign(artistToUpdate, dto)
+			return await this.artistRepository.save(artistToUpdate)
+		}
 	}
 
 	async delete(id: string) {
-		const artistDelete = await this.db.removeArtist(id)
-		return artistDelete
+		const artistDelete = await this.artistRepository.delete(id)
+		if (artistDelete.affected === 0) {
+			throw new NotFoundException(`Artist with id ${id} not found`)
+		}
 	}
 }
