@@ -1,10 +1,8 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto, UpdatePasswordDto } from './dto/user.dto';
-import { db } from '../DB/DB'
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserEntity } from './entities/user.entity';
-import { v4 } from 'uuid';
 
 @Injectable()
 export class UserService {
@@ -12,23 +10,10 @@ export class UserService {
 		@InjectRepository(UserEntity)
 		private userRepository: Repository<UserEntity>
 	) { }
-	private db = db
-
-
-	getAll() {
-		return this.db.getAllUsers()
-	}
 
 	async finAll() {
 		const users = await this.userRepository.find()
 		return users
-	}
-	async getById(id: string) {
-		const currentUser = await this.db.getUserById(id)
-		if (!currentUser) {
-			throw new Error()
-		}
-		return currentUser
 	}
 
 	async findOne(id: string) {
@@ -39,16 +24,7 @@ export class UserService {
 	}
 
 	async create(dto: CreateUserDto): Promise<UserEntity> {
-		// const checkUser = await this.userRepository.findOne({where: {login: dto.login}})
-		// if( checkUser ) { throw new Except}
 		const newUser = new UserEntity(dto)
-		newUser.login = dto.login
-		newUser.password = dto.password
-		newUser.id = v4()
-		newUser.version = 1
-		newUser.createdAt = new Date()
-		newUser.updatedAt = new Date()
-
 		return await this.userRepository.save(newUser)
 	}
 
@@ -56,6 +32,7 @@ export class UserService {
 		const userToUpdate = await this.findOne(id)
 		if (dto.oldPassword === userToUpdate.password) {
 			userToUpdate.password = dto.newPassword
+			userToUpdate.version++
 			return await this.userRepository.save(userToUpdate)
 		}
 

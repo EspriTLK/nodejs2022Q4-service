@@ -14,7 +14,7 @@ export class UserEntity {
 	@Column()
 	password: string
 
-	@Column()
+	@Column({ default: 1 })
 	version: number
 
 	@CreateDateColumn()
@@ -22,11 +22,6 @@ export class UserEntity {
 
 	@UpdateDateColumn()
 	updatedAt: Date
-
-	// toResponse() {
-	// 	const { id, login } = this
-	// 	return { id, login }
-	// }
 
 	constructor(partials: Partial<UserEntity>) {
 		Object.assign(this, partials);

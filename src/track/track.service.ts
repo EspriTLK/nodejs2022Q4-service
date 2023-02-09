@@ -1,41 +1,48 @@
-import { Injectable } from '@nestjs/common';
-import { db } from '../DB/DB'
-import { TrackModel } from './track.model';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { Repository } from 'typeorm';
+import { TrackEntity } from './entities/track.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { UpdateTrackDto } from './dto/update-track-dto';
+import { AddTrackDto } from './dto/create-track.dto';
 
 @Injectable()
 export class TrackService {
-	private db = db
+	constructor(
+		@InjectRepository(TrackEntity)
+		private trackRepository: Repository<TrackEntity>) { }
 
-	async getAll() {
-		return await this.db.getAllTracks()
+	async findAll(): Promise<TrackEntity[]> {
+		return await this.trackRepository.find()
 	}
 
-	async getById(id: string) {
-		const currentTrack = await this.db.getTrackById(id)
-		if (!currentTrack) {
-			throw new Error('track not found')
+	async findOne(id: string): Promise<TrackEntity> {
+		const track = await this.trackRepository.findOne({ where: { id: id } })
+		if (track) {
+			return track
 		}
-		return currentTrack
+		throw new NotFoundException(`Track with id ${id} is not found`)
 	}
 
-	async create(dto: TrackModel) {
-		const track = await this.db.createTrack(dto)
-		return track
+	async create(dto: AddTrackDto): Promise<TrackEntity> {
+		const newTrack = await this.trackRepository.create(dto)
+		return await this.trackRepository.save(newTrack)
 	}
 
-	async update(id: string, dto: TrackModel) {
-		const changedTrack = await this.db.updateTrack(id, dto)
-		if (!changedTrack) {
-			console.log('[from service]')
-			throw new Error('service')
+	async update(id: string, dto: UpdateTrackDto): Promise<TrackEntity> {
+		const trackToUpdate = await this.findOne(id)
+
+		if (trackToUpdate) {
+			Object.assign(trackToUpdate, dto)
+			return await this.trackRepository.save(trackToUpdate)
 		}
-
-		return changedTrack
 	}
 
 	async delete(id: string) {
-		const trackDelete = await this.db.removeTrack(id)
-		return trackDelete
+		const trackDelete = await this.trackRepository.delete(id)
+
+		if (trackDelete.affected === 0) {
+			throw new NotFoundException(`Track with id ${id} is not found`)
+		}
 	}
 
 }
