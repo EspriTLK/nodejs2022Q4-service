@@ -3,6 +3,7 @@
 /node_modules
 .env
 */DataBase
+*/migrations
 # Logs
 logs
 *.log

@@ -9,18 +9,23 @@ export class FavoriteController {
 
 	@Get()
 	async getAlbums(): Promise<object> {
-		return await this.favService.getAll()
+		const favorites = await this.favService.findAll()
+
+		return { albums: favorites }
+		// return await this.favService.getAll()
 	}
 
 	@Post(':path/:id')
 	async addToFav(@Param('path') path: string, @Param('id', ParseUUIDPipe) id: string): Promise<any> {
 		if (path === 'track' || path === 'album' || path === 'artist') {
-
-			try {
-				return await this.favService.addFavorite(path, id)
-			} catch (err) {
-				throw new HttpErrorByCode[422]
+			if (path === 'album') {
+				return this.favService.addAlbumToFavorite(id)
 			}
+			// try {
+			// 	return await this.favService.addFavorite(path, id)
+			// } catch (err) {
+			// 	throw new HttpErrorByCode[422]
+			// }
 		} else {
 			throw new HttpErrorByCode[404]
 		}

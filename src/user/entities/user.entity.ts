@@ -1,5 +1,5 @@
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm"
-import { Exclude } from "class-transformer";
+import { Exclude, Transform } from "class-transformer";
 
 @Entity('user')
 export class UserEntity {
@@ -18,9 +18,11 @@ export class UserEntity {
 	version: number
 
 	@CreateDateColumn()
+	@Transform(({ value }) => new Date(value).getTime())
 	createdAt: Date
 
 	@UpdateDateColumn()
+	@Transform(({ value }) => new Date(value).getTime())
 	updatedAt: Date
 
 	constructor(partials: Partial<UserEntity>) {

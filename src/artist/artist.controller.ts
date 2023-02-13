@@ -23,7 +23,7 @@ export class ArtistController {
 		try {
 			return await this.artistService.create(dto)
 		} catch (error) {
-			return error.message
+			throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
 		}
 	}
 
