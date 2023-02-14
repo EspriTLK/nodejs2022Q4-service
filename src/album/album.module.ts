@@ -6,11 +6,9 @@ import { AlbumEntity } from './entities/album.entity';
 import { ArtistModule } from 'src/artist/artist.module';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([AlbumEntity]),
-    ArtistModule],
-  exports: [AlbumService, TypeOrmModule],
-  providers: [AlbumService],
-  controllers: [AlbumController]
+	imports: [TypeOrmModule.forFeature([AlbumEntity]), ArtistModule],
+	exports: [AlbumService, TypeOrmModule],
+	providers: [AlbumService],
+	controllers: [AlbumController],
 })
-export class AlbumModule { }
+export class AlbumModule {}

@@ -9,40 +9,40 @@ import { AddTrackDto } from './dto/create-track.dto';
 export class TrackService {
 	constructor(
 		@InjectRepository(TrackEntity)
-		private trackRepository: Repository<TrackEntity>) { }
+		private trackRepository: Repository<TrackEntity>,
+	) {}
 
 	async findAll(): Promise<TrackEntity[]> {
-		return await this.trackRepository.find()
+		return await this.trackRepository.find();
 	}
 
 	async findOne(id: string): Promise<TrackEntity> {
-		const track = await this.trackRepository.findOne({ where: { id: id } })
+		const track = await this.trackRepository.findOne({ where: { id: id } });
 		if (track) {
-			return track
+			return track;
 		}
-		throw new NotFoundException(`Track with id ${id} is not found`)
+		throw new NotFoundException(`Track with id ${id} is not found`);
 	}
 
 	async create(dto: AddTrackDto): Promise<TrackEntity> {
-		const newTrack = await this.trackRepository.create(dto)
-		return await this.trackRepository.save(newTrack)
+		const newTrack = await this.trackRepository.create(dto);
+		return await this.trackRepository.save(newTrack);
 	}
 
 	async update(id: string, dto: UpdateTrackDto): Promise<TrackEntity> {
-		const trackToUpdate = await this.findOne(id)
+		const trackToUpdate = await this.findOne(id);
 
 		if (trackToUpdate) {
-			Object.assign(trackToUpdate, dto)
-			return await this.trackRepository.save(trackToUpdate)
+			Object.assign(trackToUpdate, dto);
+			return await this.trackRepository.save(trackToUpdate);
 		}
 	}
 
 	async delete(id: string) {
-		const trackDelete = await this.trackRepository.delete(id)
+		const trackDelete = await this.trackRepository.delete(id);
 
 		if (trackDelete.affected === 0) {
-			throw new NotFoundException(`Track with id ${id} is not found`)
+			throw new NotFoundException(`Track with id ${id} is not found`);
 		}
 	}
-
 }

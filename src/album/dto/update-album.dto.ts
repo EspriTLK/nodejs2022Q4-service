@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsBoolean, IsNumber, IsUUID } from 'class-validator'
+import { IsString, IsOptional, IsNumber, IsUUID } from 'class-validator';
 
 export class UpdateAlbumDto {
 	id: string; // uuid v4

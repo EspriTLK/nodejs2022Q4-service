@@ -1,7 +1,7 @@
-import { Exclude } from "class-transformer";
-import { AlbumEntity } from "src/album/entities/album.entity";
-import { TrackEntity } from "src/track/entities/track.entity";
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Exclude } from 'class-transformer';
+// import { AlbumEntity } from 'src/album/entities/album.entity';
+// import { TrackEntity } from 'src/track/entities/track.entity';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('artist')
 export class ArtistEntity {

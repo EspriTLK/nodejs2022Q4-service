@@ -1,7 +1,7 @@
-import { Exclude } from "class-transformer";
-import { AlbumEntity } from "src/album/entities/album.entity";
-import { ArtistEntity } from "src/artist/entities/artist.entity";
-import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Exclude } from 'class-transformer';
+import { AlbumEntity } from 'src/album/entities/album.entity';
+import { ArtistEntity } from 'src/artist/entities/artist.entity';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('track')
 export class TrackEntity {
@@ -19,10 +19,11 @@ export class TrackEntity {
 	@Column({ default: false })
 	isFavorite: boolean;
 
-	@ManyToOne(() => ArtistEntity, (artist) => artist.id, { onDelete: "SET NULL" })
+	@ManyToOne(() => ArtistEntity, (artist) => artist.id, {
+		onDelete: 'SET NULL',
+	})
 	artist: ArtistEntity;
 
 	@ManyToOne(() => AlbumEntity, (album) => album.id, { onDelete: 'SET NULL' })
 	album: AlbumEntity;
-
 }

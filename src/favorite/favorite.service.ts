@@ -1,4 +1,8 @@
-import { forwardRef, HttpCode, HttpException, Inject, Injectable, UnprocessableEntityException } from '@nestjs/common';
+import {
+	HttpCode,
+	Injectable,
+	UnprocessableEntityException,
+} from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FavoriteEntity } from './entities/favorite.entity';
@@ -16,16 +20,26 @@ export class FavoriteService {
 		@InjectRepository(TrackEntity)
 		private readonly trackRepository: Repository<TrackEntity>,
 		@InjectRepository(ArtistEntity)
-		private readonly artistRepository: Repository<ArtistEntity>
-	) { }
+		private readonly artistRepository: Repository<ArtistEntity>,
+	) {}
 
 	async findAll() {
 		// const albums = await this.favRepository.find({ select: ['albums'] })
-		const albumIsFavorite = await this.albumRepository.find({ where: { isFavorite: true } })
-		const trackIsFavorite = await this.trackRepository.find({ where: { isFavorite: true } })
-		const artistIsFavorite = await this.artistRepository.find({ where: { isFavorite: true } })
+		const albumIsFavorite = await this.albumRepository.find({
+			where: { isFavorite: true },
+		});
+		const trackIsFavorite = await this.trackRepository.find({
+			where: { isFavorite: true },
+		});
+		const artistIsFavorite = await this.artistRepository.find({
+			where: { isFavorite: true },
+		});
 
-		return { albums: albumIsFavorite, tracks: trackIsFavorite, artists: artistIsFavorite }
+		return {
+			albums: albumIsFavorite,
+			tracks: trackIsFavorite,
+			artists: artistIsFavorite,
+		};
 	}
 
 	// async addAlbumToFavorite(id: string) {
@@ -41,22 +55,24 @@ export class FavoriteService {
 	// }
 
 	async addFavorite(path, id) {
-		const fav = await this[`${path}Repository`].findOne({ where: { id: id } })
+		const fav = await this[`${path}Repository`].findOne({ where: { id: id } });
 		if (!fav) {
-			throw new UnprocessableEntityException(`${path} with id ${id} not found`)
+			throw new UnprocessableEntityException(`${path} with id ${id} not found`);
 		}
-		fav.isFavorite = true
-		await this[`${path}Repository`].save(fav)
-		return fav
+		fav.isFavorite = true;
+		await this[`${path}Repository`].save(fav);
+		return fav;
 	}
 
 	async removeFavorite(path, id) {
-		const favToDelete = await this[`${path}Repository`].findOne({ where: { id: id } })
+		const favToDelete = await this[`${path}Repository`].findOne({
+			where: { id: id },
+		});
 		if (!favToDelete) {
-			throw new UnprocessableEntityException(`${path} with id ${id} not found`)
+			throw new UnprocessableEntityException(`${path} with id ${id} not found`);
 		}
-		favToDelete.isFavorite = false
-		await this[`${path}Repository`].save(favToDelete)
-		return HttpCode[204]
+		favToDelete.isFavorite = false;
+		await this[`${path}Repository`].save(favToDelete);
+		return HttpCode[204];
 	}
 }

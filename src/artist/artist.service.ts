@@ -9,41 +9,41 @@ import { ArtistEntity } from './entities/artist.entity';
 export class ArtistService {
 	constructor(
 		@InjectRepository(ArtistEntity)
-		private artistRepository: Repository<ArtistEntity>
-	) { }
+		private artistRepository: Repository<ArtistEntity>,
+	) {}
 
 	async findAll() {
-		return await this.artistRepository.find()
+		return await this.artistRepository.find();
 	}
 
 	async findOne(id: string) {
-		const artist = await this.artistRepository.findOne({ where: { id: id } })
+		const artist = await this.artistRepository.findOne({ where: { id: id } });
 
 		if (artist) {
-			return artist
+			return artist;
 		}
 
-		throw new NotFoundException(`Artist with id ${id} not found`)
+		throw new NotFoundException(`Artist with id ${id} not found`);
 	}
 
 	async create(dto: AddArtistDto) {
-		const artist = await this.artistRepository.create(dto)
-		return await this.artistRepository.save(artist)
+		const artist = await this.artistRepository.create(dto);
+		return await this.artistRepository.save(artist);
 	}
 
 	async update(id: string, dto: UpdateArtistDto) {
-		const artistToUpdate = await this.findOne(id)
+		const artistToUpdate = await this.findOne(id);
 
 		if (artistToUpdate) {
-			Object.assign(artistToUpdate, dto)
-			return await this.artistRepository.save(artistToUpdate)
+			Object.assign(artistToUpdate, dto);
+			return await this.artistRepository.save(artistToUpdate);
 		}
 	}
 
 	async delete(id: string) {
-		const artistDelete = await this.artistRepository.delete(id)
+		const artistDelete = await this.artistRepository.delete(id);
 		if (artistDelete.affected === 0) {
-			throw new NotFoundException(`Artist with id ${id} not found`)
+			throw new NotFoundException(`Artist with id ${id} not found`);
 		}
 	}
 }

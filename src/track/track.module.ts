@@ -5,9 +5,9 @@ import { TrackController } from './track.controller';
 import { TrackService } from './track.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([TrackEntity])],
-  exports: [TrackService, TypeOrmModule],
-  controllers: [TrackController],
-  providers: [TrackService]
+	imports: [TypeOrmModule.forFeature([TrackEntity])],
+	exports: [TrackService, TypeOrmModule],
+	controllers: [TrackController],
+	providers: [TrackService],
 })
-export class TrackModule { }
+export class TrackModule {}

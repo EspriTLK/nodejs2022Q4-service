@@ -1,4 +1,10 @@
-import { IsString, IsNumber, IsOptional, IsUUID, IsNotEmpty } from 'class-validator'
+import {
+	IsString,
+	IsNumber,
+	IsOptional,
+	IsUUID,
+	IsNotEmpty,
+} from 'class-validator';
 
 export class AddTrackDto {
 	id: string; // uuid v4
