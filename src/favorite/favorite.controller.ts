@@ -1,9 +1,9 @@
-import { Controller, Delete, Get, HostParam, HttpCode, HttpException, HttpStatus, Param, ParseUUIDPipe, Post } from '@nestjs/common';
+import { ClassSerializerInterceptor, Controller, Delete, Get, HostParam, HttpCode, HttpException, HttpStatus, Param, ParseUUIDPipe, Post, UseInterceptors } from '@nestjs/common';
 import { HttpErrorByCode } from '@nestjs/common/utils/http-error-by-code.util';
 import { FavoriteService } from './favorite.service';
-import { FavoritesRepsonse } from './interfaces/fav.interface';
 
 @Controller('favs')
+@UseInterceptors(ClassSerializerInterceptor)
 export class FavoriteController {
 	constructor(private readonly favService: FavoriteService) { }
 
@@ -11,21 +11,13 @@ export class FavoriteController {
 	async getAlbums(): Promise<object> {
 		const favorites = await this.favService.findAll()
 
-		return { albums: favorites }
-		// return await this.favService.getAll()
+		return favorites
 	}
 
 	@Post(':path/:id')
 	async addToFav(@Param('path') path: string, @Param('id', ParseUUIDPipe) id: string): Promise<any> {
 		if (path === 'track' || path === 'album' || path === 'artist') {
-			if (path === 'album') {
-				return this.favService.addAlbumToFavorite(id)
-			}
-			// try {
-			// 	return await this.favService.addFavorite(path, id)
-			// } catch (err) {
-			// 	throw new HttpErrorByCode[422]
-			// }
+			return await this.favService.addFavorite(path, id)
 		} else {
 			throw new HttpErrorByCode[404]
 		}
@@ -36,11 +28,7 @@ export class FavoriteController {
 	async remFromFav(@Param('path') path: string, @Param('id', ParseUUIDPipe) id: string): Promise<any> {
 
 		if (path === 'track' || path === 'album' || path === 'artist') {
-			try {
-				return await this.favService.removeFavorite(path, id)
-			} catch (err) {
-				throw new HttpException('not in favorite', HttpStatus.NOT_FOUND)
-			}
+			return await this.favService.removeFavorite(path, id)
 		} else {
 			throw new HttpErrorByCode[404]
 		}
