@@ -1,6 +1,7 @@
 FROM node:18-alpine3.15 AS builder
 WORKDIR /app
 COPY /*.json ./
+RUN npm install
 COPY . .
 RUN npm run build
 
