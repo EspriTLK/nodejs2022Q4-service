@@ -11,6 +11,12 @@
 git clone https://github.com/EspriTLK/nodejs2022Q4-service.git
 ```
 
+## Select correct brach
+
+```
+git checkout dev_task7
+```
+
 ## Installing NPM modules
 
 ```
