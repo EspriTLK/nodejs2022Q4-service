@@ -23,7 +23,11 @@
     "typeorm:run-migration": "npm run typeorm -- migration:run",
     "typeorm:generate-migration": "npm run typeorm -- migration:generate",
     "typeorm:create-migration": "npm run typeorm -- migration:create -- src/migrations/$npm_config_name",
-    "typeorm:revert-migration": "npm run typeorm -- migration:revert"
+    "typeorm:revert-migration": "npm run typeorm -- migration:revert",
+    "docker": "docker-compose up",
+    "docker:test": "docker exec node_container npm run test",
+    "scan:node": "docker scan node",
+    "scan:postgres": "docker scan postgres"
   },
   "dependencies": {
     "@nestjs/common": "^8.0.0",

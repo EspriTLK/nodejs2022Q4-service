@@ -11,6 +11,7 @@ services:
     volumes:
       - ../2. Init Database:/docker-entrypoint-initdb.d
       - ./src/DataBase:/var/lib/postgresql/data
+      - ./src/DataBase/logs:/var/lib/postgresql/postgresql.log
     ports:
       - ${POSTGRES_PORT}:${POSTGRES_PORT}
     restart: unless-stopped
