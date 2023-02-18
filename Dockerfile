@@ -8,6 +8,8 @@ RUN npm install --cache-clean --force
 
 COPY . .
 
+RUN npm run build
+
 EXPOSE ${PORT}
 
 CMD ["npm", "run", "start:dev"]
