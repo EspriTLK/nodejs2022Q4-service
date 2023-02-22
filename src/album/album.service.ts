@@ -1,40 +1,67 @@
-import { Injectable } from '@nestjs/common';
-import { db } from 'src/DB/DB'
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { AddAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { AlbumEntity } from './entities/album.entity';
+import { ArtistEntity } from 'src/artist/entities/artist.entity';
 
 @Injectable()
 export class AlbumService {
-	private db = db
+	constructor(
+		@InjectRepository(AlbumEntity)
+		private albumRepository: Repository<AlbumEntity>,
+		@InjectRepository(ArtistEntity)
+		private artistRepository: Repository<ArtistEntity>,
+	) {}
 
-	async getAll() {
-		return await this.db.getAllAlbums()
+	async findAll(): Promise<AlbumEntity[]> {
+		return await this.albumRepository.find();
 	}
 
-	async getById(id: string) {
-		const currentAlbum = await this.db.getAlbumById(id)
-		if (!currentAlbum) {
-			throw new Error('track not found')
+	async findOne(id: string): Promise<AlbumEntity> {
+		const album = await this.albumRepository.findOne({ where: { id: id } });
+		if (album) {
+			return album;
 		}
-		return currentAlbum
+
+		throw new NotFoundException(`Album with ${id} not found`);
 	}
 
 	async create(dto: AddAlbumDto) {
-		const album = await this.db.createAlbum(dto)
-		return album
+		const album = this.albumRepository.create(dto);
+		if (dto.artistId) {
+			const checkArtist = await this.artistRepository.findOne({
+				where: { id: dto.artistId },
+			});
+			if (checkArtist === null) {
+				album.artistId = null;
+			}
+		}
+		return await this.albumRepository.save(album);
 	}
 
 	async update(id: string, dto: UpdateAlbumDto) {
-		const changedAlbum = await this.db.updateAlbum(id, dto)
-		if (!changedAlbum) {
-			throw new Error('service')
-		}
+		const albumToUpdate = await this.findOne(id);
 
-		return changedAlbum
+		if (albumToUpdate) {
+			if (dto.artistId) {
+				const checkArtist = await this.artistRepository.findOne({
+					where: { id: dto.artistId },
+				});
+				if (checkArtist === null) {
+					throw new NotFoundException(`Can't find artist ${dto.artistId}`);
+				}
+			}
+			Object.assign(albumToUpdate, dto);
+			return await this.albumRepository.save(albumToUpdate);
+		}
 	}
 
 	async delete(id: string) {
-		const albumDelete = await this.db.removeAlbum(id)
-		return albumDelete
+		const albumDelete = await this.albumRepository.delete(id);
+		if (albumDelete.affected === 0) {
+			throw new NotFoundException(`Album with ${id} not found`);
+		}
 	}
 }

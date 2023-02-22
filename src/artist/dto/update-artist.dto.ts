@@ -1,9 +1,9 @@
-import { IsString, IsOptional, IsBoolean } from 'class-validator'
+import { IsString, IsOptional, IsBoolean, IsNotEmpty } from 'class-validator';
 
 export class UpdateArtistDto {
-	id: string; // uuid v4
 	@IsOptional()
 	@IsString()
+	@IsNotEmpty()
 	name: string;
 	@IsOptional()
 	@IsBoolean()

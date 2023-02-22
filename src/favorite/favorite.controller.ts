@@ -1,43 +1,51 @@
-import { Controller, Delete, Get, HostParam, HttpCode, HttpException, HttpStatus, Param, ParseUUIDPipe, Post } from '@nestjs/common';
+import {
+	ClassSerializerInterceptor,
+	Controller,
+	Delete,
+	Get,
+	HttpCode,
+	Param,
+	ParseUUIDPipe,
+	Post,
+	UseInterceptors,
+} from '@nestjs/common';
 import { HttpErrorByCode } from '@nestjs/common/utils/http-error-by-code.util';
 import { FavoriteService } from './favorite.service';
-import { FavoritesRepsonse } from './interfaces/fav.interface';
 
 @Controller('favs')
+@UseInterceptors(ClassSerializerInterceptor)
 export class FavoriteController {
-	constructor(private readonly favService: FavoriteService) { }
+	constructor(private readonly favService: FavoriteService) {}
 
 	@Get()
 	async getAlbums(): Promise<object> {
-		return await this.favService.getAll()
+		const favorites = await this.favService.findAll();
+
+		return favorites;
 	}
 
 	@Post(':path/:id')
-	async addToFav(@Param('path') path: string, @Param('id', ParseUUIDPipe) id: string): Promise<any> {
+	async addToFav(
+		@Param('path') path: string,
+		@Param('id', ParseUUIDPipe) id: string,
+	): Promise<any> {
 		if (path === 'track' || path === 'album' || path === 'artist') {
-
-			try {
-				return await this.favService.addFavorite(path, id)
-			} catch (err) {
-				throw new HttpErrorByCode[422]
-			}
+			return await this.favService.addFavorite(path, id);
 		} else {
-			throw new HttpErrorByCode[404]
+			throw new HttpErrorByCode[404]();
 		}
 	}
 
 	@HttpCode(204)
 	@Delete(':path/:id')
-	async remFromFav(@Param('path') path: string, @Param('id', ParseUUIDPipe) id: string): Promise<any> {
-
+	async remFromFav(
+		@Param('path') path: string,
+		@Param('id', ParseUUIDPipe) id: string,
+	): Promise<any> {
 		if (path === 'track' || path === 'album' || path === 'artist') {
-			try {
-				return await this.favService.removeFavorite(path, id)
-			} catch (err) {
-				throw new HttpException('not in favorite', HttpStatus.NOT_FOUND)
-			}
+			return await this.favService.removeFavorite(path, id);
 		} else {
-			throw new HttpErrorByCode[404]
+			throw new HttpErrorByCode[404]();
 		}
 	}
 }
